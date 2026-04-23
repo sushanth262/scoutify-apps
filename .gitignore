@@ -1,0 +1,7 @@
+# Root orchestration repo only
+*
+
+# Keep root-level docs and solution
+!README.md
+!ScoutifyApps.sln
+!.gitignore
