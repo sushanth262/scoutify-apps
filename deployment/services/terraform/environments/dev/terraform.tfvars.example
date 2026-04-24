@@ -1,0 +1,31 @@
+# Services Terraform variables (dev)
+# Copy this file to terraform.tfvars and edit values.
+
+deployment_local = true
+namespace        = "scoutify"
+
+kubeconfig_path    = "~/.kube/config"
+kubeconfig_context = "minikube"
+
+jwt_signing_key = "REPLACE-WITH-MIN-32-CHAR-JWT-KEY"
+google_client_id = "REPLACE-GOOGLE-CLIENT-ID"
+
+# Secret placeholders. Use local placeholders in local mode;
+# use real values or CI secrets in cloud mode.
+openai_api_key       = "PLACEHOLDER-OPENAI-KEY"
+alphavantage_api_key = "PLACEHOLDER-ALPHA-VANTAGE-KEY"
+finnhub_api_key      = "PLACEHOLDER-FINNHUB-KEY"
+
+key_vault_uri = "https://REPLACE-KEYVAULT-NAME.vault.azure.net/"
+service_bus_connection_string = "Endpoint=sb://REPLACE.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=REPLACE"
+
+local_vault_address    = "http://vault.scoutify.svc.cluster.local:8200"
+local_vault_root_token = "root"
+
+scoutify_api_image = "ghcr.io/sushanth262/scoutify:latest"
+auth_api_image = "ghcr.io/sushanth262/scoutify-auth-api:latest"
+features_api_image = "ghcr.io/sushanth262/scoutify-features-api:latest"
+stocks_api_image = "ghcr.io/sushanth262/scoutify-core-api:latest"
+edge_gateway_image = "ghcr.io/sushanth262/scoutify-edge-gateway:latest"
+ai_worker_image = "ghcr.io/sushanth262/scoutify-ai-analysis-service:latest"
+

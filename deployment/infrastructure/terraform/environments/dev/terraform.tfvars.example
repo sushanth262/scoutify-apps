@@ -1,0 +1,21 @@
+# Infrastructure Terraform variables (dev)
+# Copy this file to terraform.tfvars and edit values.
+
+# true = local desktop mode (skip Azure infra)
+# false = cloud mode (create Azure resources)
+deployment_local = true
+
+environment         = "dev"
+location            = "eastus"
+resource_group_name = "scoutify-dev-rg"
+name_prefix         = "scoutify-dev"
+
+# AKS (cloud only)
+aks_kubernetes_version = "1.29.7"
+aks_node_vm_size       = "Standard_B2s"
+aks_node_count         = 1
+
+# Cloud messaging and secrets infra
+service_bus_namespace_name = "scoutify-dev-sb"
+key_vault_name             = "scoutifydevkv001"
+

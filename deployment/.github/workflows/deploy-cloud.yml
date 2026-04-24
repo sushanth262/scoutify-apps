@@ -1,0 +1,63 @@
+name: Deploy Scoutify Cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Terraform environment"
+        required: true
+        default: "dev"
+        type: choice
+        options: [dev]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init/Apply Infrastructure
+        working-directory: deployment/infrastructure/terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve \
+            -var-file=environments/${{ inputs.environment }}/terraform.tfvars \
+            -var="deployment_local=false"
+
+      - name: Write AKS kubeconfig
+        working-directory: deployment/infrastructure/terraform
+        run: |
+          terraform output -raw aks_kube_config > "$RUNNER_TEMP/aks-kubeconfig"
+          chmod 600 "$RUNNER_TEMP/aks-kubeconfig"
+
+      - name: Terraform Init/Apply Services
+        working-directory: deployment/services/terraform
+        env:
+          KUBECONFIG: ${{ runner.temp }}/aks-kubeconfig
+        run: |
+          terraform init
+          terraform apply -auto-approve \
+            -var-file=environments/${{ inputs.environment }}/terraform.tfvars \
+            -var="deployment_local=false" \
+            -var="kubeconfig_context=" \
+            -var="jwt_signing_key=${{ secrets.JWT_SIGNING_KEY }}" \
+            -var="google_client_id=${{ secrets.GOOGLE_CLIENT_ID }}" \
+            -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" \
+            -var="alphavantage_api_key=${{ secrets.ALPHAVANTAGE_API_KEY }}" \
+            -var="finnhub_api_key=${{ secrets.FINNHUB_API_KEY }}"

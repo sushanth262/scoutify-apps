@@ -5,3 +5,7 @@
 !README.md
 !ScoutifyApps.sln
 !.gitignore
+
+# Track deployment automation and IaC
+!deployment/
+!deployment/**

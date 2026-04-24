@@ -1,0 +1,60 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+.terraform.lock.hcl
+
+# Sensitive files
+*.pem
+*.key
+*.crt
+secrets/
+*.secret
+.env
+.env.local
+*.env
+
+# Infrastructure outputs
+infrastructure-outputs.json
+outputs.json
+deployment-output.json
+
+# Azure
+*.publishsettings
+*.azurePubxml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local development
+local/
+.local/
+
