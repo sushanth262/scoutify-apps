@@ -24,6 +24,7 @@ flowchart LR
     Features --> F3["Smart Money"]
     Features --> F4["Market Data"]
     Features --> F5["AI Chat Cards"]
+    F5 -->|"worker-backed AI via stocks insights API"| Stocks
 
     Stocks -->|"enqueue request"| Queue[("RabbitMQ or Azure Service Bus")]
     Queue -->|"consume"| Worker["AI Analysis Worker"]
@@ -84,12 +85,18 @@ flowchart LR
 flowchart LR
     Req["Feature Request"] --> Ctrls["Feature Controllers"]
     Ctrls --> Service["FeatureDataService"]
-    Service --> Data["Current: in-memory data"]
+    Service --> Data["In-memory data for watchlist, screener, smart-money, market-data"]
+    Service -->|"for ai/chat and ai/cards"| StocksApi["Stocks API /api/stocks/insights"]
+    StocksApi --> Queue[("RabbitMQ or Service Bus")]
+    Queue --> Worker["AI Analysis Worker"]
+    Worker --> StocksApi
     Data --> Resp["JSON Response"]
+    StocksApi --> Resp
 ```
 
 - Powers watchlist, screener, smart money, market data, and AI chat/cards.
 - Uses async service layer; easy to replace data source with DB/external services.
+- `ai/chat` and `ai/cards` now call `Stocks API`, which routes through queue + worker for real analysis.
 
 ### 5) `scoutify-core-api` (Stocks API)
 
@@ -142,7 +149,9 @@ flowchart LR
 ## End-to-End Data Flow (Feature + AI)
 
 1. User logs in through `Auth API` and gets a JWT.
-2. User hits feature endpoints via edge gateway; `Features API` responds directly.
-3. For deep AI insights, `Stocks API` enqueues request to message bus.
-4. Worker processes request using cache, secrets, and external providers.
-5. Worker publishes correlated response; `Stocks API` returns final insight to UI.
+2. User hits feature endpoints via edge gateway.
+3. Standard feature endpoints (`watchlist`, `screener`, `smart-money`, `market-data`) respond directly from `Features API`.
+4. AI endpoints in `Features API` (`ai/chat`, `ai/cards`) call `Stocks API` for worker-backed analysis.
+5. `Stocks API` enqueues request to message bus.
+6. Worker processes request using cache, secrets, and external providers.
+7. Worker publishes correlated response; `Stocks API` returns final insight to `Features API`, then to UI.
