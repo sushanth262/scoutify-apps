@@ -97,7 +97,11 @@ resource "kubernetes_deployment" "local_infra" {
 }
 
 resource "kubernetes_service" "local_infra" {
-  for_each = var.deployment_local ? kubernetes_deployment.local_infra : {}
+  for_each = var.deployment_local ? {
+    rabbitmq = { port = 5672 }
+    redis    = { port = 6379 }
+    vault    = { port = 8200 }
+  } : {}
 
   metadata {
     name      = each.key
@@ -106,8 +110,8 @@ resource "kubernetes_service" "local_infra" {
   spec {
     selector = { app = each.key }
     port {
-      port        = each.key == "rabbitmq" ? 5672 : each.key == "redis" ? 6379 : 8200
-      target_port = each.key == "rabbitmq" ? 5672 : each.key == "redis" ? 6379 : 8200
+      port        = each.value.port
+      target_port = each.value.port
     }
   }
 }
@@ -155,7 +159,8 @@ resource "kubernetes_deployment" "services" {
               { name = "REQUEST_QUEUE", value = "stock-requests" },
               { name = "RESPONSE_QUEUE", value = "stock-responses" }
             ] : each.key == "scoutify-ui-host" ? [
-              { name = "DOTNET_EDGE_GATEWAY_URL", value = "http://scoutify-edge-gateway.${var.namespace}.svc.cluster.local:8080" }
+              { name = "DOTNET_EDGE_GATEWAY_URL", value = "http://scoutify-edge-gateway.${var.namespace}.svc.cluster.local:8080" },
+              { name = "AUTH_API_DIRECT_URL", value = "http://scoutify-auth-api.${var.namespace}.svc.cluster.local:8080" }
             ] : []
             content {
               name  = env.value.name

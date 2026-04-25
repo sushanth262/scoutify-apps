@@ -1,6 +1,6 @@
 param(
     [string]$Namespace = "scoutify",
-    [string]$KubeContext = "minikube"
+    [string]$KubeContext = "docker-desktop"
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,9 +20,22 @@ Require-Command "docker"
 
 Write-Host "Using Kubernetes context: $KubeContext"
 kubectl config use-context $KubeContext | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to switch kubectl context to '$KubeContext'. Verify the context exists (`kubectl config get-contexts`)."
+}
 
-if (-not (kubectl get namespace $Namespace -o name 2>$null)) {
+# Probe cluster connectivity without failing on native-command stderr.
+& kubectl get nodes --request-timeout=10s *> $null
+if ($LASTEXITCODE -ne 0) {
+    throw "Kubernetes context '$KubeContext' is set but not reachable. Start your local cluster (Docker Desktop Kubernetes or minikube) and retry."
+}
+
+$existingNamespace = & kubectl get namespace $Namespace -o name --ignore-not-found 2>$null
+if ([string]::IsNullOrWhiteSpace($existingNamespace)) {
     kubectl create namespace $Namespace | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create namespace '$Namespace'."
+    }
 }
 
 Write-Host "Namespace '$Namespace' is ready."
