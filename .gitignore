@@ -9,3 +9,6 @@
 # Track deployment automation and IaC
 !deployment/
 !deployment/**
+
+# Local Docker image exports (large binaries; keep out of Git)
+deployment/images/
