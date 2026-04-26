@@ -12,3 +12,12 @@
 
 # Local Docker image exports (large binaries; keep out of Git)
 deployment/images/
+
+# Service build/runtime artifacts (if any service paths are unignored)
+**/bin/
+**/obj/
+**/out/
+**/build/
+**/dist/
+**/coverage/
+**/TestResults/
